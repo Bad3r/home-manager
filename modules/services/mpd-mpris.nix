@@ -16,26 +16,21 @@ in
       connect to the local MPD server.
     '')
 
-    (lib.mkRenamedOptionModule
-      [ "services" "mpd-mpris" "mpd" "network" ]
-      [ "services" "mpd-mpris" "settings" "network" ]
-    )
-
-    (lib.mkRenamedOptionModule
-      [ "services" "mpd-mpris" "mpd" "host" ]
-      [ "services" "mpd-mpris" "settings" "host" ]
-    )
-
-    (lib.mkRenamedOptionModule
-      [ "services" "mpd-mpris" "mpd" "port" ]
-      [ "services" "mpd-mpris" "settings" "port" ]
-    )
-
     (lib.mkRemovedOptionModule [ "services" "mpd-mpris" "mpd" "password" ] ''
       Use `services.mpd-mpris.settings.pwd-file` instead, which will not
       write your password to the world readable nix store.
     '')
-  ];
+  ]
+  ++ (lib.hm.deprecations.mkSettingsRenamedOptionModules
+    [ "services" "mpd-mpris" "mpd" ]
+    [ "services" "mpd-mpris" "settings" ]
+    { transform = x: x; }
+    [
+      "network"
+      "host"
+      "port"
+    ]
+  );
 
   options.services.mpd-mpris = {
     enable = lib.mkEnableOption "mpd-mpris: An implementation of the MPRIS protocol for MPD";
@@ -98,8 +93,9 @@ in
           };
 
           pwd-file = lib.mkOption {
-            type = with lib.types; nullOr path;
+            type = with lib.types; nullOr (either str path);
             default = null;
+            example = "/run/secrets/mpd";
             description = ''
               Path to a file containing the password to connect to MPD.
             '';
@@ -107,7 +103,14 @@ in
         };
       });
       default = { };
-      description = "Options to be set on the command line.";
+      description = ''
+        Options to be set on the command line.
+
+        These options are written to the world-readable Nix store as part of
+        the systemd unit, so avoid setting the MPD password with `pwd` here.
+        Use [](#opt-services.mpd-mpris.settings.pwd-file) instead, which
+        mpd-mpris reads when it starts.
+      '';
       example = {
         instance-name = "desktop";
         port = 9876;
@@ -163,6 +166,12 @@ in
               option = "-${optionName}";
               sep = null;
               explicitBool = false;
+              formatArg =
+                value:
+                if lib.hm.strings.isPathLike value then
+                  toString value
+                else
+                  lib.generators.mkValueStringDefault { } value;
             };
 
             flags = lib.cli.toCommandLine optionFormat cfg.settings;
