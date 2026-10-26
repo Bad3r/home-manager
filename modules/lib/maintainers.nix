@@ -67,6 +67,12 @@
     github = "Avimitin";
     githubId = 30021675;
   };
+  awa2333 = {
+    name = "Yaoheng He/luke";
+    email = "62987171+awa2333@users.noreply.github.com";
+    github = "awa2333";
+    githubId = 62987171;
+  };
   bamhm182 = {
     name = "bamhm182";
     email = "bamhm182@gmail.com";
@@ -552,6 +558,11 @@
     email = "radoslawszamszur@gmail.com";
     github = "rszamszur";
     githubId = 10353018;
+  };
+  sand4rt = {
+    name = "sand4rt";
+    github = "sand4rt";
+    githubId = 17591696;
   };
   silmarp = {
     name = "Silmar Pereira da Silva Junior";
